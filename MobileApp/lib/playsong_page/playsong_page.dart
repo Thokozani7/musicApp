@@ -1,23 +1,84 @@
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:MobileApp/keys/keys.dart';
 import 'package:MobileApp/playsong_page/clipping_curve.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:just_audio/just_audio.dart';
 
 class PlaySongPage extends StatefulWidget {
   static String tag = "play-song";
+  SongInfo songInfo;
+  Function changeSong;
   final String imageUrl;
+  final GlobalKey<PlaySongPageState> key = SSKeys.key;
   // PlaySongPage({Key key}) : super(key: key);
-  PlaySongPage({this.imageUrl});
+  PlaySongPage({this.imageUrl, this.songInfo, this.changeSong});
 
   @override
-  _PlaySongPageState createState() => _PlaySongPageState();
+  PlaySongPageState createState() => PlaySongPageState();
 }
 
-class _PlaySongPageState extends State<PlaySongPage> {
+class PlaySongPageState extends State<PlaySongPage> {
   double minimumValue = 0.0, maximumValue = 0.0, currentValue = 0.0;
   String currentTime = '', endTime = '';
   bool isPlaying = false;
+
+  final AudioPlayer player = AudioPlayer();
+
+  void initState() {
+    super.initState();
+    setSong(widget.songInfo);
+  }
+
+  void dispose() {
+    super.dispose();
+    player?.dispose();
+  }
+
+  void setSong(SongInfo songInfo) async {
+    widget.songInfo = songInfo;
+    await player.setUrl(widget.songInfo.uri);
+    currentValue = minimumValue;
+    maximumValue = player.duration.inMilliseconds.toDouble();
+    if (mounted) {
+      setState(() {
+        currentTime = getDuration(currentValue);
+        endTime = getDuration(maximumValue);
+      });
+    }
+    isPlaying = false;
+    changeStatus();
+    player.positionStream.listen((duration) {
+      currentValue = duration.inMilliseconds.toDouble();
+      if (mounted) {
+        setState(() {
+          currentTime = getDuration(currentValue);
+        });
+      }
+    });
+  }
+
+  void changeStatus() {
+    setState(() {
+      isPlaying = !isPlaying;
+    });
+    if (isPlaying) {
+      player.play();
+    } else {
+      player.pause();
+    }
+  }
+
+  String getDuration(double value) {
+    Duration duration = Duration(milliseconds: value.round());
+
+    return [duration.inMinutes, duration.inSeconds]
+        .map((element) => element.remainder(60).toString().padLeft(2, '0'))
+        .join(':');
+  }
 
   // final AudioPlayer player=AudioPlayer();
 
@@ -30,7 +91,7 @@ class _PlaySongPageState extends State<PlaySongPage> {
         backgroundColor: Colors.transparent,
         centerTitle: true,
         title: Text(
-          "Umzuzu by Xolly Mncwango",
+          widget.songInfo.title + " by " + widget.songInfo.artist,
           style: TextStyle(fontSize: 11),
         ),
       ),
@@ -39,7 +100,14 @@ class _PlaySongPageState extends State<PlaySongPage> {
         child: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: NetworkImage(widget.imageUrl.toString() != null ? widget.imageUrl : "https://icon-library.com/images/blu-ray-icon/blu-ray-icon-18.jpg"),
+              image: widget.songInfo.albumArtwork == null
+                  ? NetworkImage(
+                      'https://images-na.ssl-images-amazon.com/images/I/71cWTuFUQtL._SY355_.jpg',
+                    )
+                  : FileImage(File(widget.songInfo.albumArtwork)),
+              // NetworkImage(widget.imageUrl.toString() != null
+              //     ? widget.imageUrl
+              //     : "https://icon-library.com/images/blu-ray-icon/blu-ray-icon-18.jpg"),
               fit: BoxFit.cover,
             ),
           ),
@@ -52,7 +120,7 @@ class _PlaySongPageState extends State<PlaySongPage> {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), //10 10
             child: Container(
-              color: Colors.black.withOpacity(0.5),//0.2
+              color: Colors.black.withOpacity(0.5), //0.2
               child: Column(
                 children: [
                   Expanded(
@@ -112,9 +180,12 @@ class _PlaySongPageState extends State<PlaySongPage> {
                               //   ),
                               // ),
                               CircleAvatar(
-                            backgroundImage: NetworkImage(
-                              widget.imageUrl.toString() != null ? widget.imageUrl : "https://icon-library.com/images/blu-ray-icon/blu-ray-icon-18.jpg",
-                            ),
+                            backgroundImage: widget.songInfo.albumArtwork ==
+                                    null
+                                ? NetworkImage(
+                                    'https://images-na.ssl-images-amazon.com/images/I/71cWTuFUQtL._SY355_.jpg',
+                                  )
+                                : FileImage(File(widget.songInfo.albumArtwork)),
                             radius: 115,
                           ),
                         ),
@@ -156,8 +227,12 @@ class _PlaySongPageState extends State<PlaySongPage> {
                                 children: [
                                   Container(
                                     padding: EdgeInsets.only(left: 20),
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.5,
+                                    // color: Colors.green,
                                     child: Text(
-                                      "Umzuzu",
+                                      widget.songInfo.title,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold),
@@ -168,8 +243,11 @@ class _PlaySongPageState extends State<PlaySongPage> {
                                   ),
                                   Container(
                                     padding: EdgeInsets.only(left: 20),
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.5,
                                     child: Text(
-                                      "Xolly Mncwango",
+                                      widget.songInfo.artist,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                           color: Colors.white, fontSize: 10),
                                     ),
@@ -197,8 +275,8 @@ class _PlaySongPageState extends State<PlaySongPage> {
                             value: currentValue,
                             onChanged: (value) {
                               currentValue = value;
-                              // player.seek(
-                              //     Duration(milliseconds: currentValue.round()));
+                              player.seek(
+                                  Duration(milliseconds: currentValue.round()));
                             },
                           ),
                           Row(
@@ -207,7 +285,7 @@ class _PlaySongPageState extends State<PlaySongPage> {
                               Container(
                                 padding: EdgeInsets.only(left: 20),
                                 child: Text(
-                                  "0:50",
+                                  currentTime,
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 12),
                                 ),
@@ -215,7 +293,7 @@ class _PlaySongPageState extends State<PlaySongPage> {
                               Container(
                                 padding: EdgeInsets.only(right: 25),
                                 child: Text(
-                                  "-2:10",
+                                  endTime,
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 12),
                                 ),
@@ -237,24 +315,42 @@ class _PlaySongPageState extends State<PlaySongPage> {
                                 ),
                               ),
                               Container(
-                                child: Icon(
-                                  FontAwesomeIcons.backward,
-                                  color: Colors.white,
-                                  size: 20,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    widget.changeSong(false);
+                                  },
+                                  child: Icon(
+                                    FontAwesomeIcons.backward,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
                                 ),
                               ),
                               Container(
-                                child: Icon(
-                                  Icons.pause_outlined,
-                                  color: Colors.white,
-                                  size: 55,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // widget.changeSong(false);
+                                    changeStatus();
+                                  },
+                                  child: Icon(
+                                    isPlaying
+                                        ? Icons.pause_outlined
+                                        : Icons.play_circle_filled_outlined,
+                                    color: Colors.white,
+                                    size: 55,
+                                  ),
                                 ),
                               ),
                               Container(
-                                child: Icon(
-                                  FontAwesomeIcons.forward,
-                                  color: Colors.white,
-                                  size: 20,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    widget.changeSong(true);
+                                  },
+                                  child: Icon(
+                                    FontAwesomeIcons.forward,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
                                 ),
                               ),
                               Container(
