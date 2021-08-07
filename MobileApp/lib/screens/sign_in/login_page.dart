@@ -145,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                     //     fit: BoxFit.contain,
                     //   ),
                     // ),
-                    Text("SIGN IN"),
+                    Text("SIGN IN",style: TextStyle(fontSize: 50)),
                     SizedBox(height: 45.0),
                     // emailField,
                     RectangulaInputField(
