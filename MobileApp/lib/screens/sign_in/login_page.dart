@@ -1,6 +1,12 @@
+// import 'dart:html';
+
+import 'package:MobileApp/constants/constants.dart';
+import 'package:MobileApp/screens/widgets/rect_button.dart';
+import 'package:MobileApp/screens/widgets/rect_input_field.dart';
+import 'package:MobileApp/screens/widgets/tapped_button.dart';
 import 'package:flutter/material.dart';
-import 'home_page.dart';
-import 'showsongs_page/showsongs_page.dart';
+// import '../home_page.dart';
+import '../showsongs_page/showsongs_page.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
@@ -14,7 +20,17 @@ class _LoginPageState extends State<LoginPage> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
+  bool signInButtonPress = false;
+
+  TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 15.0);
+
+  void _signInButtonPress() {
+    print("setting state");
+    setState(() {
+        signInButtonPress = false;
+    });
+      Navigator.of(context).pushNamed(ShowSongsPage.tag);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +42,15 @@ class _LoginPageState extends State<LoginPage> {
         controller: _emailController,
         style: style,
         decoration: InputDecoration(
+            labelStyle: TextStyle(color: Colors.white),
             contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
             // hintText: "Email",
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(32.0),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(32.0),
+              borderSide: const BorderSide(color: Colors.grey),
             ),
             labelText: 'Email'),
         validator: (String value) {
@@ -52,8 +73,13 @@ class _LoginPageState extends State<LoginPage> {
         decoration: InputDecoration(
             contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
             // hintText: "Password",
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(32.0),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(32.0),
+              borderSide: const BorderSide(color: Colors.grey),
+            ),
             labelText: "Password"),
       ),
     );
@@ -92,15 +118,16 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [Colors.blue, Colors.blueAccent]),
-      ),
+      // decoration: BoxDecoration(
+      //   gradient: LinearGradient(
+      //       begin: Alignment.topCenter,
+      //       end: Alignment.bottomCenter,
+      //       colors: [lightPrimary, darkPrimary]),
+      // ),
       child: Scaffold(
         // backgroundColor: Colors.green,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.grey[850],
+        // backgroundColor: Colors.transparent,
         body: Center(
           child: Container(
             // color: Colors.blue,
@@ -111,21 +138,48 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
+                    // SizedBox(
+                    //   height: 100.0,
+                    //   child: Image.asset(
+                    //     "assets/login.png",
+                    //     fit: BoxFit.contain,
+                    //   ),
+                    // ),
+                    Text("SIGN IN"),
+                    SizedBox(height: 45.0),
+                    // emailField,
+                    RectangulaInputField(
+                      hintText: 'Email',
+                      icon: Icons.email_rounded,
+                      obscureText: false,
+                    ),
+                    SizedBox(height: 25.0),
+                    // passwordField,
+                    RectangulaInputField(
+                      hintText: 'Paassword',
+                      icon: Icons.lock,
+                      obscureText: true,
+                    ),
                     SizedBox(
-                      height: 100.0,
-                      child: Image.asset(
-                        "assets/login.png",
-                        fit: BoxFit.contain,
+                      height: 10,
+                    ),
+                    Text(
+                      'Forgot Password',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 15,
                       ),
                     ),
-                    SizedBox(height: 45.0),
-                    emailField,
-                    SizedBox(height: 25.0),
-                    passwordField,
                     SizedBox(
                       height: 35.0,
                     ),
-                    loginButon,
+                    // loginButon,
+                    GestureDetector(
+                      onTap: _signInButtonPress,
+                      child: signInButtonPress
+                          ? ButtonTapped(text: 'Sign In')
+                          : RectangularButton(text: 'Sign In'),
+                    ),
                     SizedBox(height: 25.0),
                     register,
                     SizedBox(

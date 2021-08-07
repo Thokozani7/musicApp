@@ -1,8 +1,9 @@
 import 'dart:io';
 
 import 'package:MobileApp/keys/keys.dart';
-import 'package:MobileApp/playsong_page/playsong_page.dart';
-import 'package:MobileApp/showsongs_page/track_tile.dart';
+// import 'package:MobileApp/playsong_page/playsong_page.dart';
+import 'package:MobileApp/screens/showsongs_page/track_tile.dart';
+// import 'package:MobileApp/showsongs_page/track_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 

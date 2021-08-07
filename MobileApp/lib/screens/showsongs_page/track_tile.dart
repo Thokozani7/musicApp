@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:MobileApp/playsong_page/playsong_page.dart';
+// import 'package:MobileApp/playsong_page/playsong_page.dart';
+import 'package:MobileApp/screens/playsong_page/playsong_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 

@@ -2,7 +2,8 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:MobileApp/keys/keys.dart';
-import 'package:MobileApp/playsong_page/clipping_curve.dart';
+import 'package:MobileApp/models/recently_played.dart';
+// import 'package:MobileApp/playsong_page/clipping_curve.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -40,11 +41,19 @@ class PlaySongPageState extends State<PlaySongPage> {
 
   void setSong(SongInfo songInfo) async {
     widget.songInfo = songInfo;
+    List newList = [];
+    // RecentlyPlayedSongs.songs.add(songInfo);
+    // RecentlyPlayedSongs.songs
+    //     .distinct()
+    //     .observe((next) => newList.add(next), () => print(newList));
+    ;
+    print(RecentlyPlayedSongs.songs);
     await player.setUrl(widget.songInfo.uri);
     currentValue = minimumValue;
     maximumValue = player.duration.inMilliseconds.toDouble();
     if (mounted) {
       setState(() {
+        RecentlyPlayedSongs.songs.add(songInfo);
         currentTime = getDuration(currentValue);
         endTime = getDuration(maximumValue);
       });

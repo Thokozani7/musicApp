@@ -1,7 +1,14 @@
-import 'package:MobileApp/playsong_page/playsong_page.dart';
-import 'package:MobileApp/showsongs_page/all_tracks.dart';
+import 'dart:io';
+
+import 'package:MobileApp/models/recently_played.dart';
+// import 'package:MobileApp/playsong_page/playsong_page.dart';
+import 'package:MobileApp/screens/playsong_page/playsong_page.dart';
+// import 'package:MobileApp/showsongs_page/all_tracks.dart';
 import 'package:curved_drawer/curved_drawer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_audio_query/flutter_audio_query.dart';
+
+import 'all_tracks.dart';
 
 class ShowSongsPage extends StatefulWidget {
   static String tag = "my-music";
@@ -12,9 +19,15 @@ class ShowSongsPage extends StatefulWidget {
 }
 
 class _ShowSongsPageState extends State<ShowSongsPage> {
+  List<SongInfo> songs;
   @override
   Widget build(BuildContext context) {
-    songPofile({String imageUrl, String songName, String artistName}) =>
+    songs = RecentlyPlayedSongs.songs;
+    songPofile(
+            {ImageProvider<Object> imageUrl,
+            String songName,
+            String artistName,
+            SongInfo songInfo}) =>
         Container(
           padding: EdgeInsets.symmetric(horizontal: 10),
           child: InkWell(
@@ -22,7 +35,7 @@ class _ShowSongsPageState extends State<ShowSongsPage> {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (BuildContext context) =>
-                      PlaySongPage(imageUrl: imageUrl),
+                      PlaySongPage(songInfo: songInfo),
                 ),
               );
             },
@@ -30,25 +43,35 @@ class _ShowSongsPageState extends State<ShowSongsPage> {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage: NetworkImage(imageUrl),
+                  backgroundImage: imageUrl,
                 ),
                 SizedBox(height: 10.0),
-                Text(
-                  songName,
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
+                Container(
+                  width: 100.0,
+                  // color: Colors.blueAccent,
+                  alignment: Alignment.center,
+                  child: Text(
+                    songName,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
                 ),
                 SizedBox(height: 3.0),
-                Text(
-                  artistName,
-                  style: TextStyle(color: Colors.white, fontSize: 12),
+                Container(
+                  width: 100.0,
+                  // color: Colors.blueAccent,
+                  alignment: Alignment.center,
+                  child: Text(
+                    artistName,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
                 )
               ],
             ),
           ),
         );
-
-    
 
     return Container(
       // height: 100,
@@ -138,47 +161,57 @@ class _ShowSongsPageState extends State<ShowSongsPage> {
                       Container(
                         height: 130,
                         child: ListView.builder(
-                            itemCount: 1,
+                            itemCount: songs.length,
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (context, index) {
                               return Container(
                                 child: Row(
                                   children: [
                                     songPofile(
-                                        imageUrl:
-                                            "https://images-na.ssl-images-amazon.com/images/I/71cWTuFUQtL._SY355_.jpg",
-                                        songName: "Imagine me",
-                                        artistName: "Kirk Franklin"),
-                                    songPofile(
-                                        imageUrl:
-                                            "https://i1.wp.com/hiphopza.com/wp-content/uploads/2020/12/ALBUM-Ntokozo-Mbambo-%E2%80%93-The-First-Noel.jpg?w=500&ssl=1",
-                                        songName: "Wamuhle",
-                                        artistName: "Ntokozo Mbambo"),
-                                    songPofile(
-                                        imageUrl:
-                                            "https://e-cdn-images.dzcdn.net/images/artist/ea777201a19463ba139492132039e547/264x264-000000-80-0-0.jpg",
-                                        songName: "Shall never",
-                                        artistName: "Xolly Mncwango"),
-                                    songPofile(
-                                        imageUrl:
-                                            "https://s3.amazonaws.com/broadtime_photo/418459067098",
-                                        songName: "Zuliphathe kahle",
-                                        artistName: "Joyous Celebration"),
-                                    songPofile(
-                                        imageUrl:
-                                            "https://icon-library.com/images/blu-ray-icon/blu-ray-icon-18.jpg",
-                                        songName: "Bless the Lord",
-                                        artistName: "Cory Henry"),
-                                    songPofile(
-                                        imageUrl:
-                                            "https://i1.wp.com/hiphopza.com/wp-content/uploads/2020/12/ALBUM-Ntokozo-Mbambo-%E2%80%93-The-First-Noel.jpg?w=500&ssl=1",
-                                        songName: "Wamuhle",
-                                        artistName: "Ntokozo Mbambo"),
-                                    songPofile(
-                                        imageUrl:
-                                            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHOcNrStUXqDdiiluvis6JR-ADI33Wue1E_OU1LyPwc0ew63q23nxabibPO66xUJVRLzM&usqp=CAU",
-                                        songName: "Wamuhle",
-                                        artistName: "Ntokozo Mbambo"),
+                                        songInfo: songs[index],
+                                        imageUrl: songs[index] == null
+                                            ? NetworkImage(
+                                                'https://images-na.ssl-images-amazon.com/images/I/71cWTuFUQtL._SY355_.jpg',
+                                              )
+                                            : FileImage(File(
+                                                songs[index].albumArtwork)),
+                                        songName: songs[index].title,
+                                        artistName: songs[index].artist),
+                                    // songPofile(
+                                    //     imageUrl:
+                                    //         "https://images-na.ssl-images-amazon.com/images/I/71cWTuFUQtL._SY355_.jpg",
+                                    //     songName: "Imagine me",
+                                    //     artistName: "Kirk Franklin"),
+                                    // songPofile(
+                                    //     imageUrl:
+                                    //         "https://i1.wp.com/hiphopza.com/wp-content/uploads/2020/12/ALBUM-Ntokozo-Mbambo-%E2%80%93-The-First-Noel.jpg?w=500&ssl=1",
+                                    //     songName: "Wamuhle",
+                                    //     artistName: "Ntokozo Mbambo"),
+                                    // songPofile(
+                                    //     imageUrl:
+                                    //         "https://e-cdn-images.dzcdn.net/images/artist/ea777201a19463ba139492132039e547/264x264-000000-80-0-0.jpg",
+                                    //     songName: "Shall never",
+                                    //     artistName: "Xolly Mncwango"),
+                                    // songPofile(
+                                    //     imageUrl:
+                                    //         "https://s3.amazonaws.com/broadtime_photo/418459067098",
+                                    //     songName: "Zuliphathe kahle",
+                                    //     artistName: "Joyous Celebration"),
+                                    // songPofile(
+                                    //     imageUrl:
+                                    //         "https://icon-library.com/images/blu-ray-icon/blu-ray-icon-18.jpg",
+                                    //     songName: "Bless the Lord",
+                                    //     artistName: "Cory Henry"),
+                                    // songPofile(
+                                    //     imageUrl:
+                                    //         "https://i1.wp.com/hiphopza.com/wp-content/uploads/2020/12/ALBUM-Ntokozo-Mbambo-%E2%80%93-The-First-Noel.jpg?w=500&ssl=1",
+                                    //     songName: "Wamuhle",
+                                    //     artistName: "Ntokozo Mbambo"),
+                                    // songPofile(
+                                    //     imageUrl:
+                                    //         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHOcNrStUXqDdiiluvis6JR-ADI33Wue1E_OU1LyPwc0ew63q23nxabibPO66xUJVRLzM&usqp=CAU",
+                                    //     songName: "Wamuhle",
+                                    //     artistName: "Ntokozo Mbambo"),
                                   ],
                                 ),
                               );
@@ -203,9 +236,7 @@ class _ShowSongsPageState extends State<ShowSongsPage> {
                           SizedBox(
                             height: 40.0,
                           ),
-                          Flexible(
-                            child: Tracks()
-                          )
+                          Flexible(child: Tracks())
                         ],
                       ),
                     ),

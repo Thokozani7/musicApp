@@ -1,8 +1,10 @@
+import 'package:MobileApp/screens/showsongs_page/showsongs_page.dart';
+import 'package:MobileApp/screens/sign_in/login_page.dart';
 import 'package:flutter/material.dart';
-import 'login_page.dart';
+// import 'sign_in/login_page.dart';
 import 'home_page.dart';
-import 'playsong_page/playsong_page.dart';
-import 'showsongs_page/showsongs_page.dart';
+// import 'playsong_page/playsong_page.dart';
+// import 'showsongs_page/showsongs_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -28,6 +30,12 @@ class MyApp extends StatelessWidget {
         // This makes the visual density adapt to the platform that you run
         // the app on. For desktop platforms, the controls will be smaller and
         // closer together (more dense) than on mobile platforms.
+        // primaryColor: Colors.redAccent,
+        // primaryColorLight:  Colors.redAccent,
+        textTheme: Theme.of(context).textTheme.apply(
+              bodyColor: Colors.white,
+              displayColor: Colors.white,
+            ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: LoginPage(),
